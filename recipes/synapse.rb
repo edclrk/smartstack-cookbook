@@ -39,7 +39,6 @@ directory node.synapse.home do
 end
 
 if node.synapse.jarname
-  # include_recipe 'java'
   java_ark 'jdk install' do
     # url 'https://store.vistacore.us/nexus/content/repositories/filerepo/third-party/project/oracle/jdk/8u77-linux/jdk-8u77-linux-x64.tar.gz'
     url node.smartstack.java.url

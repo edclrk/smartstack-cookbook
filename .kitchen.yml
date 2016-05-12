@@ -27,7 +27,7 @@ suites:
 #      - recipe[yum]
 #      - recipe[smartstack::default]
       - recipe[smartstack::synapse]
-#      - recipe[smartstack::nerve]
+      - recipe[smartstack::nerve]
 #      - recipe[smartstack::test]
 #      - recipe[minitest-handler]
     attributes:

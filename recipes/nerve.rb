@@ -9,13 +9,20 @@ directory node.nerve.home do
 end
 
 if node.nerve.jarname
-  include_recipe 'java'
-
-  url = "#{node.smartstack.jar_source}/nerve/#{node.nerve.jarname}"
-  remote_file File.join(node.nerve.home, node.nerve.jarname) do
-    source url
-    mode   00644
+  java_ark 'jdk install' do
+    url node.smartstack.java.url
+    checksum node.smartstack.java.checksum
+    action :install
+    app_home '/usr/local/java/default'
+    bin_cmds ["java", "javac"]
+    action :install
   end
+
+  cookbook_file File.join(node.nerve.home, node.nerve.jarname) do
+    source 'nerve.jar'
+    mode 00644
+  end
+
 else
   git node.nerve.install_dir do
     user              node.smartstack.user
@@ -28,14 +35,28 @@ else
     notifies   :restart, 'runit_service[nerve]'
   end
 
+  # set up gem home
+  directory node.smartstack.gem_home do
+    owner     node.smartstack.user
+    group     node.smartstack.user
+    recursive true
+  end
+
+
+
+  # NOTE: Finally got this to run by
+  #  Needed to create the /home/vagrant/.bundle folder
+  #  commented out the user/group settings, so presumably ran under vagrant, which is probably still wrong
+  #  commented out the environment line
   # do the actual install of nerve and dependencies
   execute "nerve_install" do
     cwd     node.nerve.install_dir
     user    node.smartstack.user
     group   node.smartstack.user
-    action  :nothing
 
-    environment ({'GEM_HOME' => node.smartstack.gem_home})
+    action  :run
+
+    environment ({'HOME' => node.smartstack.gem_home, 'GEM_HOME' => node.smartstack.gem_home, 'BUNDLE_PATH' => node.smartstack.gem_home})
     command     "bundle install --without development"
   end
 end
@@ -70,6 +91,14 @@ node.nerve.enabled_services.each do |service_name|
     check['port'] = port
     node.default.nerve.config.services["#{service_name}_#{port}"] = check
   end
+end
+
+# set up runit service
+# we don't want a converge to randomly start nerve if someone is debugging
+# so, we only enable nerve; setting it up initially causes it to start,
+runit_service 'nerve' do
+  action :enable
+  default_logger true
 end
 
 # write the config to the config file for nerve
