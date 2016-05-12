@@ -8,7 +8,7 @@ Vagrant.configure("2") do |master_config|
 
   # Enabling the Berkshelf plugin. To enable this globally, add this configuration
   # option to your ~/.vagrant.d/Vagrantfile file
-  master_config.berkshelf.enabled = true
+  # master_config.berkshelf.enabled = true
 
   # An array of symbols representing groups of cookbook described in the Vagrantfile
   # to exclusively install and copy to Vagrant's shelf.
@@ -28,28 +28,6 @@ Vagrant.configure("2") do |master_config|
       v.customize ['modifyvm', :id,
         '--memory', '512',
         '--cpus',   '2',
-      ]
-    end
-
-    config.vm.provision :chef_solo do |chef|
-      chef.json = {
-        :smartstack => {
-          :development => true
-        },
-        :env => 'test',
-        :languages => { :ruby => { :default_version => '1.9.1' } },
-      }
-
-      # uncomment to use with chef 11.6
-      #chef.environments_path = File.join(smartstack_dir, 'environments')
-      #chef.environment = 'test'
-
-      chef.run_list = [
-          "recipe[apt]",
-          "recipe[smartstack::synapse]",
-          "recipe[smartstack::nerve]",
-          "recipe[smartstack::test]",
-          "recipe[minitest-handler]"
       ]
     end
   end

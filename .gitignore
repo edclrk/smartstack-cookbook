@@ -1,2 +1,4 @@
 .vagrant
 .*sw?
+.kitchen/
+.kitchen.local.yml

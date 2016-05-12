@@ -1,0 +1,40 @@
+---
+driver:
+  name: vagrant
+
+provisioner:
+  name: chef_solo
+
+platforms:
+  - name: ubuntu
+    driver:
+      box: ubuntu-14.04
+      box_url: https://cloud-images.ubuntu.com/vagrant/trusty/current/trusty-server-cloudimg-i386-vagrant-disk1.box
+      network:
+      - ["private_network", {ip: "192.168.33.35"}]
+
+  - name: centos
+    driver:
+      box: opscode-centos-6.5
+#      box_url: https://github.com/2creatives/vagrant-centos/releases/download/v6.5.3/centos65-x86_64-20140116.box
+      network:
+      - ["private_network", {ip: "192.168.33.34"}]
+
+suites:
+  - name: default
+    run_list:
+#      - recipe[apt]
+#      - recipe[yum]
+#      - recipe[smartstack::default]
+      - recipe[smartstack::synapse]
+#      - recipe[smartstack::nerve]
+#      - recipe[smartstack::test]
+#      - recipe[minitest-handler]
+    attributes:
+      smartstack:
+        development: true
+      env: 'test'
+      languages:
+        ruby:
+          default_version: '1.9.1'
+
