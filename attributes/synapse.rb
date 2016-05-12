@@ -6,7 +6,7 @@ default.synapse.config_file = File.join(node.synapse.home,'config.json')
 
 default.synapse.repository = 'https://github.com/airbnb/synapse.git'
 default.synapse.reference = 'v0.10.0'
-default.synapse.jarname = nil
+default.synapse.jarname = 'synapse.jar'
 default.synapse.jvmopts = '-Xmx64m -XX:PermSize=64m'
 
 # override this in your role file or wrapper cookbook

@@ -39,12 +39,27 @@ directory node.synapse.home do
 end
 
 if node.synapse.jarname
-  include_recipe 'java'
+  # include_recipe 'java'
+  java_ark 'jdk install' do
+    # url 'https://store.vistacore.us/nexus/content/repositories/filerepo/third-party/project/oracle/jdk/8u77-linux/jdk-8u77-linux-x64.tar.gz'
+    url node.smartstack.java.url
+    # checksum 'a47dc0962a57b27a0cc00b9f11a53dc3add40c98633ba49a2419b845e4dedf43'
+    checksum node.smartstack.java.checksum
+    action :install
+    app_home '/usr/local/java/default'
+    bin_cmds ["java", "javac"]
+    action :install
+  end
 
-  url = "#{node.smartstack.jar_source}/synapse/#{node.synapse.jarname}"
-  remote_file File.join(node.synapse.home, node.synapse.jarname) do
-    source url
-    mode   00644
+  # url = "#{node.smartstack.jar_source}/synapse/#{node.synapse.jarname}"
+  # remote_file File.join(node.synapse.home, node.synapse.jarname) do
+  #   source url
+  #   mode   00644
+  # end
+
+  cookbook_file File.join(node.synapse.home, node.synapse.jarname) do
+    source 'synapse.jar'
+    mode 00644
   end
 else
   git node.synapse.install_dir do
@@ -58,15 +73,26 @@ else
     notifies   :restart, 'runit_service[synapse]'
   end
 
+  # set up gem home
+  directory node.smartstack.gem_home do
+    owner     node.smartstack.user
+    group     node.smartstack.user
+    recursive true
+  end
+
   # do the actual install of synapse and dependencies
   execute "synapse_install" do
     cwd     node.synapse.install_dir
     user    node.smartstack.user
     group   node.smartstack.user
-    action  :nothing
+    action  :run
+    # action  :nothing
+    # environment ({'GEM_HOME' => node.smartstack.gem_home})
 
-    environment ({'GEM_HOME' => node.smartstack.gem_home})
-    command     "bundle install --without development"
+    # ubuntu
+    # environment ({'HOME' => node.smartstack.gem_home, 'GEM_HOME' => node.smartstack.gem_home, 'BUNDLE_PATH' => node.smartstack.gem_home})
+    environment ({'GEM_HOME' => node.smartstack.gem_home, 'BUNDLE_PATH' => node.smartstack.gem_home})
+    command 'bundle install --without development'
   end
 end
 
